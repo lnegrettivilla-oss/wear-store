@@ -1,98 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 export default function Home() {
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1200);
-
-    return () => clearTimeout(timer);
-
-  }, []);
-
-  if (loading) {
-
-    return (
-
-      <main className="bg-black min-h-screen flex items-center justify-center">
-
-        <div className="text-center">
-
-          <h1 className="text-white text-6xl font-black tracking-[12px] animate-pulse">
-
-            WEAR
-
-          </h1>
-
-          <p className="text-gray-500 mt-5 tracking-[5px] uppercase text-sm">
-
-            Loading Fashion Experience
-
-          </p>
-
-        </div>
-
-      </main>
-
-    );
-
-  }
 
   return (
 
     <main className="bg-black min-h-screen text-white overflow-hidden">
 
       {/* HERO */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6">
+      <section className="relative min-h-screen flex items-center justify-center px-6">
 
-        {/* BACKGROUND */}
+        {/* FONDO */}
         <div
           className="absolute inset-0"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1600&auto=format&fit=crop')",
+              "url('https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=1600&auto=format&fit=crop')",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
 
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-black/65"></div>
 
         </div>
 
-        {/* CONTENT */}
-        <div className="relative z-10">
+        {/* CONTENIDO */}
+        <div className="relative z-10 text-center max-w-4xl">
 
-          <p className="text-gray-400 uppercase tracking-[7px] text-sm mb-6">
+          <p className="text-gray-300 uppercase tracking-[8px] text-sm md:text-base">
 
-            New Collection 2026
+            Nueva Colección 2026
 
           </p>
 
-          <h1 className="text-7xl md:text-9xl font-black tracking-[14px] leading-none">
+          <h1 className="text-7xl md:text-9xl font-black tracking-[14px] mt-8 leading-none">
 
             WEAR
 
           </h1>
 
-          <p className="text-gray-300 mt-10 text-lg md:text-xl max-w-[550px] leading-relaxed mx-auto">
+          <p className="text-gray-300 mt-10 text-lg md:text-2xl leading-relaxed max-w-[700px] mx-auto">
 
-            Moda minimalista premium diseñada para quienes viven el estilo urbano moderno.
+            Moda urbana premium diseñada para quienes viven el estilo,
+            la exclusividad y la elegancia minimalista.
 
           </p>
 
-          <div className="flex flex-col md:flex-row gap-5 justify-center mt-12">
+          {/* BOTONES */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-5 mt-14">
 
             <Link href="/mujer">
 
-              <button className="bg-white text-black px-10 py-5 rounded-full font-black text-lg hover:scale-105 hover:bg-gray-200 transition duration-300">
+              <button className="bg-white text-black px-10 py-5 rounded-full text-lg font-black hover:scale-105 hover:bg-gray-200 transition duration-300">
 
                 Comprar Mujer
 
@@ -102,7 +63,7 @@ export default function Home() {
 
             <Link href="/hombre">
 
-              <button className="border border-white/20 bg-white/5 backdrop-blur-md px-10 py-5 rounded-full font-black text-lg hover:bg-white hover:text-black transition duration-300">
+              <button className="border border-white/20 bg-white/10 backdrop-blur-md px-10 py-5 rounded-full text-lg font-black hover:bg-white hover:text-black transition duration-300">
 
                 Comprar Hombre
 
@@ -125,16 +86,16 @@ export default function Home() {
           <div
             className="
               relative
+              h-[520px]
               rounded-[40px]
               overflow-hidden
-              h-[500px]
               flex
               items-end
               p-10
               group
+              hover:scale-[1.02]
               transition
               duration-500
-              hover:scale-[1.02]
             "
             style={{
               backgroundImage:
@@ -144,25 +105,25 @@ export default function Home() {
             }}
           >
 
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/25 transition duration-500"></div>
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition duration-500"></div>
 
             <div className="relative z-10">
 
-              <p className="text-sm tracking-[5px] text-gray-300 uppercase">
+              <p className="uppercase tracking-[5px] text-sm text-gray-300">
 
-                Colección
+                Colección Exclusiva
 
               </p>
 
-              <h2 className="text-6xl font-black mt-4">
+              <h2 className="text-6xl md:text-7xl font-black mt-4">
 
                 MUJER
 
               </h2>
 
-              <p className="mt-4 text-gray-200 max-w-[300px]">
+              <p className="text-gray-200 mt-5 max-w-[320px] leading-relaxed">
 
-                Elegancia urbana con detalles modernos y minimalistas.
+                Diseños elegantes, modernos y minimalistas para destacar en cualquier ocasión.
 
               </p>
 
@@ -178,16 +139,16 @@ export default function Home() {
           <div
             className="
               relative
+              h-[520px]
               rounded-[40px]
               overflow-hidden
-              h-[500px]
               flex
               items-end
               p-10
               group
+              hover:scale-[1.02]
               transition
               duration-500
-              hover:scale-[1.02]
             "
             style={{
               backgroundImage:
@@ -197,25 +158,25 @@ export default function Home() {
             }}
           >
 
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/25 transition duration-500"></div>
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition duration-500"></div>
 
             <div className="relative z-10">
 
-              <p className="text-sm tracking-[5px] text-gray-300 uppercase">
+              <p className="uppercase tracking-[5px] text-sm text-gray-300">
 
-                Colección
+                Streetwear Premium
 
               </p>
 
-              <h2 className="text-6xl font-black mt-4">
+              <h2 className="text-6xl md:text-7xl font-black mt-4">
 
                 HOMBRE
 
               </h2>
 
-              <p className="mt-4 text-gray-200 max-w-[300px]">
+              <p className="text-gray-200 mt-5 max-w-[320px] leading-relaxed">
 
-                Streetwear premium para destacar en cualquier ocasión.
+                Estilo urbano premium inspirado en las tendencias internacionales.
 
               </p>
 
@@ -227,10 +188,35 @@ export default function Home() {
 
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-white/10 py-10 text-center text-gray-500 text-sm">
+      {/* DESTACADO */}
+      <section className="px-6 md:px-12 py-24 bg-[#050505] text-center">
 
-        © 2026 WEAR — Fashion Store Premium
+        <p className="uppercase tracking-[6px] text-gray-500 text-sm">
+
+          WEAR PREMIUM
+
+        </p>
+
+        <h2 className="text-5xl md:text-7xl font-black mt-8 leading-tight">
+
+          La nueva generación<br />
+          del streetwear premium.
+
+        </h2>
+
+        <p className="text-gray-400 mt-10 max-w-[700px] mx-auto text-lg leading-relaxed">
+
+          Cada colección está diseñada para transmitir exclusividad,
+          elegancia y presencia en cada detalle.
+
+        </p>
+
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-white/10 py-10 px-6 text-center text-gray-500 text-sm bg-black">
+
+        © 2026 WEAR — Moda Premium Urbana
 
       </footer>
 

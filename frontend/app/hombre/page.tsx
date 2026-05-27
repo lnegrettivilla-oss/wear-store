@@ -2,189 +2,129 @@
 
 import Link from "next/link";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { supabase } from "../../lib/supabase";
 
 export default function HombrePage() {
 
-  const [search, setSearch] = useState("");
+  const [productos, setProductos] = useState<any[]>([]);
 
-  const [categoria, setCategoria] = useState("Todos");
+  const [loading, setLoading] = useState(true);
 
-  const productos = [
+  async function obtenerProductos() {
 
-    {
-      id: 201,
-      nombre: "Polera Essential",
-      precio: "$24.990",
-      imagen: "/imagenes/man.jpg",
-      categoria: "Poleras",
-    },
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("categoria", "hombre")
+      .order("id", { ascending: false });
 
-    {
-      id: 202,
-      nombre: "Hoodie Black",
-      precio: "$39.990",
-      imagen: "/imagenes/man.jpg",
-      categoria: "Hoodies",
-    },
+    if (!error && data) {
 
-    {
-      id: 203,
-      nombre: "Oversize Premium",
-      precio: "$29.990",
-      imagen: "/imagenes/man.jpg",
-      categoria: "Oversize",
-    },
+      setProductos(data);
 
-    {
-      id: 204,
-      nombre: "Urban Style",
-      precio: "$34.990",
-      imagen: "/imagenes/man.jpg",
-      categoria: "Premium",
-    },
+    }
 
-  ];
+    setLoading(false);
 
-  const filtrados = productos.filter((producto) => {
+  }
 
-    const coincideBusqueda = producto.nombre
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  useEffect(() => {
 
-    const coincideCategoria =
-      categoria === "Todos"
-        ? true
-        : producto.categoria === categoria;
+    obtenerProductos();
 
-    return coincideBusqueda && coincideCategoria;
-
-  });
+  }, []);
 
   return (
 
     <main className="bg-black min-h-screen text-white p-5">
 
-      {/* VOLVER */}
-      <Link href="/">
+      {/* HEADER */}
+      <div className="mb-10">
 
-        <button className="mb-6 bg-[#111111] px-5 py-3 rounded-full hover:bg-white hover:text-black transition">
+        <Link href="/">
 
-          ← Volver
+          <button className="mb-6 bg-[#111111] px-5 py-3 rounded-full hover:bg-white hover:text-black transition">
 
-        </button>
-
-      </Link>
-
-      {/* TITULO */}
-      <h1 className="text-6xl font-black mb-2">
-
-        HOMBRE
-
-      </h1>
-
-      <p className="text-gray-400 mb-8">
-
-        Colección masculina premium
-
-      </p>
-
-      {/* BUSCADOR */}
-      <input
-        type="text"
-        placeholder="Buscar producto..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="
-          w-full
-          mb-6
-          bg-[#111111]
-          border border-neutral-800
-          rounded-full
-          px-6
-          py-4
-          outline-none
-        "
-      />
-
-      {/* FILTROS */}
-      <div className="flex gap-3 overflow-x-auto mb-10">
-
-        {[
-          "Todos",
-          "Poleras",
-          "Hoodies",
-          "Oversize",
-          "Premium",
-        ].map((item) => (
-
-          <button
-            key={item}
-            onClick={() => setCategoria(item)}
-            className={`
-              px-5 py-3 rounded-full whitespace-nowrap transition
-              ${
-                categoria === item
-                  ? "bg-white text-black"
-                  : "bg-[#111111] hover:bg-white hover:text-black"
-              }
-            `}
-          >
-
-            {item}
+            ← Volver
 
           </button>
 
-        ))}
+        </Link>
+
+        <h1 className="text-6xl font-black">
+
+          HOMBRE
+
+        </h1>
+
+        <p className="text-gray-400 mt-3">
+
+          Colección masculina premium
+
+        </p>
 
       </div>
 
-      {/* PRODUCTOS */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* LOADING */}
+      {loading ? (
 
-        {filtrados.map((producto) => (
+        <div className="text-center py-20 text-gray-500">
 
-          <Link
-            key={producto.id}
-            href={`/producto/${producto.id}`}
-          >
+          Cargando productos...
 
-            <div className="bg-[#111111] rounded-[25px] overflow-hidden hover:scale-[1.02] transition duration-300">
+        </div>
 
-              <img
-                src={producto.imagen}
-                className="w-full h-[220px] object-cover"
-              />
+      ) : (
 
-              <div className="p-4">
+        <div className="grid grid-cols-2 gap-4">
 
-                <h2 className="text-lg font-bold">
+          {productos.map((producto) => (
 
-                  {producto.nombre}
+            <Link
+              key={producto.id}
+              href={`/producto/${producto.id}`}
+            >
 
-                </h2>
+              <div className="bg-[#111111] rounded-[25px] overflow-hidden hover:scale-[1.02] transition duration-300">
 
-                <p className="text-gray-400 mt-1">
+                <img
+                  src={producto.imagen}
+                  className="w-full h-[260px] object-cover"
+                />
 
-                  {producto.precio}
+                <div className="p-4">
 
-                </p>
+                  <h2 className="text-lg font-bold">
 
-                <p className="text-sm text-gray-500 mt-2">
+                    {producto.nombre}
 
-                  {producto.categoria}
+                  </h2>
 
-                </p>
+                  <p className="text-gray-400 mt-2">
+
+                    ${Number(producto.precio).toLocaleString("es-CL")}
+
+                  </p>
+
+                  <p className="text-sm text-gray-500 mt-2 uppercase">
+
+                    {producto.categoria}
+
+                  </p>
+
+                </div>
 
               </div>
 
-            </div>
+            </Link>
 
-          </Link>
+          ))}
 
-        ))}
+        </div>
 
-      </div>
+      )}
 
     </main>
 

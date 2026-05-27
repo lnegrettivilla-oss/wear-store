@@ -2,65 +2,10 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useCart } from "../../../context/CartContext";
-
-const productos = [
-
-  {
-    id: 101,
-    nombre: "Top Essential",
-    precio: "$24.990",
-    categoria: "mujer",
-    descripcion: "Top femenino premium.",
-    imagenes: [
-      "/imagenes/woman.jpg",
-      "/imagenes/woman.jpg",
-      "/imagenes/woman.jpg",
-    ],
-  },
-
-  {
-    id: 102,
-    nombre: "Premium Black",
-    precio: "$39.990",
-    categoria: "mujer",
-    descripcion: "Diseño femenino elegante.",
-    imagenes: [
-      "/imagenes/woman.jpg",
-      "/imagenes/woman.jpg",
-      "/imagenes/woman.jpg",
-    ],
-  },
-
-  {
-    id: 201,
-    nombre: "Hoodie Black",
-    precio: "$39.990",
-    categoria: "hombre",
-    descripcion: "Hoodie premium urbano.",
-    imagenes: [
-      "/imagenes/man.jpg",
-      "/imagenes/man.jpg",
-      "/imagenes/man.jpg",
-    ],
-  },
-
-  {
-    id: 202,
-    nombre: "Oversize Premium",
-    precio: "$29.990",
-    categoria: "hombre",
-    descripcion: "Polera oversize premium.",
-    imagenes: [
-      "/imagenes/man.jpg",
-      "/imagenes/man.jpg",
-      "/imagenes/man.jpg",
-    ],
-  },
-
-];
+import { supabase } from "../../../lib/supabase";
 
 export default function ProductoPage() {
 
@@ -72,21 +17,77 @@ export default function ProductoPage() {
     toggleFavorite,
   } = useCart();
 
+  const [producto, setProducto] = useState<any>(null);
+
+  const [loading, setLoading] = useState(true);
+
   const [talla, setTalla] = useState("M");
 
-  const producto = productos.find(
-    (p) => p.id === Number(params.id)
-  );
+  const [imagenActiva, setImagenActiva] = useState("");
 
-  const [imagenActiva, setImagenActiva] = useState(
-    producto?.imagenes[0]
-  );
+  useEffect(() => {
+
+    obtenerProducto();
+
+  }, []);
+
+  async function obtenerProducto() {
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("id", params.id)
+      .single();
+
+    if (error) {
+
+      console.error(error);
+
+    } else {
+
+      setProducto(data);
+
+      setImagenActiva(data.imagen);
+
+    }
+
+    setLoading(false);
+
+  }
+
+  if (loading) {
+
+    return (
+
+      <main className="bg-black min-h-screen flex items-center justify-center text-white">
+
+        <div className="text-center">
+
+          <h1 className="text-5xl font-black animate-pulse">
+
+            WEAR
+
+          </h1>
+
+          <p className="text-gray-500 mt-4">
+
+            Cargando producto...
+
+          </p>
+
+        </div>
+
+      </main>
+
+    );
+
+  }
 
   if (!producto) {
 
     return (
 
-      <main className="bg-black min-h-screen text-white flex items-center justify-center">
+      <main className="bg-black min-h-screen flex items-center justify-center text-white">
 
         Producto no encontrado
 
@@ -102,12 +103,12 @@ export default function ProductoPage() {
 
   return (
 
-    <main className="bg-black min-h-screen text-white p-5">
+    <main className="bg-black min-h-screen text-white p-5 md:p-10">
 
       {/* VOLVER */}
       <Link href={`/${producto.categoria}`}>
 
-        <button className="mb-6 bg-[#111111] px-5 py-3 rounded-full hover:scale-105 transition">
+        <button className="mb-8 bg-[#111111] px-6 py-3 rounded-full hover:scale-105 hover:bg-[#1b1b1b] transition duration-300">
 
           ← Volver
 
@@ -116,17 +117,18 @@ export default function ProductoPage() {
       </Link>
 
       {/* CONTENIDO */}
-      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12">
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14">
 
         {/* GALERIA */}
         <div>
 
           {/* IMAGEN PRINCIPAL */}
-          <div className="overflow-hidden rounded-[35px]">
+          <div className="overflow-hidden rounded-[40px] border border-white/5">
 
             <img
               src={imagenActiva}
-              className="w-full h-[700px] object-cover hover:scale-105 transition duration-500"
+              alt={producto.nombre}
+              className="w-full h-[700px] object-cover hover:scale-105 transition duration-700"
             />
 
           </div>
@@ -134,18 +136,18 @@ export default function ProductoPage() {
           {/* MINIATURAS */}
           <div className="flex gap-4 mt-5">
 
-            {producto.imagenes.map((img, index) => (
+            {[1, 2, 3].map((item) => (
 
               <button
-                key={index}
-                onClick={() => setImagenActiva(img)}
+                key={item}
+                onClick={() => setImagenActiva(producto.imagen)}
                 className={`
                   overflow-hidden
                   rounded-[20px]
                   border-2
                   transition
                   ${
-                    imagenActiva === img
+                    imagenActiva === producto.imagen
                       ? "border-white scale-105"
                       : "border-transparent"
                   }
@@ -153,8 +155,9 @@ export default function ProductoPage() {
               >
 
                 <img
-                  src={img}
-                  className="w-24 h-24 object-cover"
+                  src={producto.imagen}
+                  alt={producto.nombre}
+                  className="w-24 h-24 object-cover hover:scale-110 transition duration-500"
                 />
 
               </button>
@@ -169,7 +172,7 @@ export default function ProductoPage() {
         <div className="flex flex-col justify-center">
 
           {/* TOP */}
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between gap-6">
 
             <div>
 
@@ -179,7 +182,7 @@ export default function ProductoPage() {
 
               </p>
 
-              <h1 className="text-6xl font-black mt-4">
+              <h1 className="text-5xl md:text-7xl font-black mt-5 leading-tight">
 
                 {producto.nombre}
 
@@ -193,7 +196,7 @@ export default function ProductoPage() {
               onClick={() => toggleFavorite(producto)}
 
               className={`
-                text-4xl transition duration-300
+                text-5xl transition duration-300
                 ${
                   isFavorite
                     ? "text-red-500 scale-125"
@@ -209,29 +212,41 @@ export default function ProductoPage() {
           </div>
 
           {/* PRECIO */}
-          <p className="text-4xl font-bold mt-6">
+          <p className="text-5xl font-black mt-10">
 
-            {producto.precio}
+            $
+            {Number(producto.precio).toLocaleString("es-CL")}
 
           </p>
 
           {/* DESCRIPCION */}
-          <p className="text-gray-400 mt-8 text-lg leading-relaxed">
+          <p className="text-gray-400 mt-10 text-lg leading-relaxed">
 
             {producto.descripcion}
 
           </p>
 
-          {/* TALLAS */}
-          <div className="mt-10">
+          {/* STOCK */}
+          <div className="mt-8">
 
-            <p className="text-gray-400 mb-4">
+            <span className="bg-[#111111] px-5 py-3 rounded-full text-sm text-gray-300 border border-white/5">
+
+              Stock disponible: {producto.stock}
+
+            </span>
+
+          </div>
+
+          {/* TALLAS */}
+          <div className="mt-12">
+
+            <p className="text-gray-400 mb-5 text-lg">
 
               Selecciona talla
 
             </p>
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-wrap">
 
               {["S", "M", "L", "XL"].map((size) => (
 
@@ -239,7 +254,7 @@ export default function ProductoPage() {
                   key={size}
                   onClick={() => setTalla(size)}
                   className={`
-                    w-14 h-14 rounded-full transition duration-200
+                    w-16 h-16 rounded-full transition duration-300 text-lg font-bold
                     ${
                       talla === size
                         ? "bg-white text-black scale-110"
@@ -268,7 +283,7 @@ export default function ProductoPage() {
               })
             }
 
-            className="mt-10 bg-white text-black py-5 rounded-full font-bold hover:scale-105 transition"
+            className="mt-14 bg-white text-black py-6 rounded-full text-lg font-black hover:scale-[1.02] hover:bg-gray-200 transition duration-300"
 
           >
 
