@@ -15,6 +15,9 @@ export default function ProductoPage() {
 
   const [producto, setProducto] = useState<any>(null);
 
+  const [tallaSeleccionada, setTallaSeleccionada] =
+    useState("");
+
   async function obtenerProducto() {
 
     const { data, error } = await supabase
@@ -36,6 +39,26 @@ export default function ProductoPage() {
     obtenerProducto();
 
   }, []);
+
+  function agregarCarrito() {
+
+    if (!tallaSeleccionada) {
+
+      alert("Debes seleccionar una talla");
+
+      return;
+
+    }
+
+    addToCart({
+      ...producto,
+      cantidad: 1,
+      talla: tallaSeleccionada,
+    });
+
+    alert("Producto agregado al carrito");
+
+  }
 
   if (!producto) {
 
@@ -105,14 +128,43 @@ export default function ProductoPage() {
 
           </p>
 
+          <div className="mt-10">
+
+            <p className="mb-4 text-xl font-bold">
+              Selecciona tu talla
+            </p>
+
+            <div className="flex gap-3 flex-wrap">
+
+              {["S", "M", "L", "XL", "XXL"].map((talla) => (
+
+                <button
+                  key={talla}
+                  onClick={() =>
+                    setTallaSeleccionada(talla)
+                  }
+                  className={`
+                    px-6 py-3 rounded-full border
+                    ${
+                      tallaSeleccionada === talla
+                        ? "bg-white text-black border-white"
+                        : "border-gray-600"
+                    }
+                  `}
+                >
+
+                  {talla}
+
+                </button>
+
+              ))}
+
+            </div>
+
+          </div>
+
           <button
-            onClick={() =>
-              addToCart({
-                ...producto,
-                cantidad: 1,
-                talla: "M",
-              })
-            }
+            onClick={agregarCarrito}
             className="
               mt-10
               bg-white
