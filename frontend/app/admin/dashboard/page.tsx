@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { supabase } from "../../../lib/supabase";
 
@@ -22,81 +22,177 @@ export default function DashboardPage() {
 
   const [loading, setLoading] = useState(false);
 
-  async function subirImagen() {
+  const [productos, setProductos] = useState<any[]>([]);
 
-    if (!imagen) return null;
+  const [editando, setEditando] = useState<any>(null);
 
-    const nombreArchivo = `${Date.now()}-${imagen.name}`;
+  useEffect(() => {
 
-    const { error } = await supabase.storage
-      .from("productos")
-      .upload(nombreArchivo, imagen);
+    obtenerProductos();
 
-    if (error) {
+  }, []);
 
-      console.error(error);
+  async function obtenerProductos() {
 
-      return null;
+    const { data } = await supabase
+      .from("products")
+      .select("*")
+      .order("id", { ascending: false });
+
+    if (data) {
+
+      setProductos(data);
 
     }
-
-    const { data } = supabase.storage
-      .from("productos")
-      .getPublicUrl(nombreArchivo);
-
-    return data.publicUrl;
 
   }
 
-  async function crearProducto(e: any) {
+  async function eliminarProducto(id: number) {
 
-    e.preventDefault();
+    const confirmar = confirm(
+      "¿Eliminar producto?"
+    );
 
-    setLoading(true);
-
-    const imageUrl = await subirImagen();
-
-    if (!imageUrl) {
-
-      alert("Error subiendo imagen");
-
-      setLoading(false);
-
-      return;
-
-    }
+    if (!confirmar) return;
 
     const { error } = await supabase
       .from("products")
-      .insert([
-        {
-          nombre,
-          precio: Number(precio),
-          imagen: imageUrl,
-          categoria,
-          descripcion,
-          stock: Number(stock),
-        },
-      ]);
-
-    setLoading(false);
+      .delete()
+      .eq("id", id);
 
     if (error) {
 
-      console.error(error);
-
-      alert("Error creando producto");
+      alert("Error eliminando producto");
 
     } else {
 
-      alert("Producto creado correctamente");
+      alert("Producto eliminado");
 
-      setNombre("");
-      setPrecio("");
-      setDescripcion("");
-      setStock("");
-      setPreview("");
-      setImagen(null);
+      obtenerProductos();
+
+    }
+
+  }
+
+  async function actualizarProducto() {
+
+    if (!editando) return;
+
+    const { error } = await supabase
+      .from("products")
+      .update({
+        nombre: editando.nombre,
+        precio: Number(editando.precio),
+        descripcion: editando.descripcion,
+        stock: Number(editando.stock),
+        categoria: editando.categoria,
+      })
+      .eq("id", editando.id);
+
+    if (error) {
+
+      console.log(error);
+
+      alert("Error actualizando producto");
+
+    } else {
+
+      alert("Producto actualizado");
+
+      setEditando(null);
+
+      obtenerProductos();
+
+    }
+
+  }
+
+  async function crearProducto() {
+
+    try {
+
+      setLoading(true);
+
+      if (!imagen) {
+
+        alert("Selecciona una imagen");
+
+        setLoading(false);
+
+        return;
+
+      }
+
+      const fileName =
+        `${Date.now()}-${imagen.name}`;
+
+      const { error: uploadError } =
+        await supabase.storage
+          .from("productos")
+          .upload(fileName, imagen);
+
+      if (uploadError) {
+
+        console.log(uploadError);
+
+        alert("Error subiendo imagen");
+
+        setLoading(false);
+
+        return;
+
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage
+        .from("productos")
+        .getPublicUrl(fileName);
+
+      const { error } = await supabase
+        .from("products")
+        .insert([
+          {
+            nombre,
+            precio: Number(precio),
+            imagen: publicUrl,
+            categoria,
+            descripcion,
+            stock: Number(stock),
+          },
+        ]);
+
+      if (error) {
+
+        console.log(error);
+
+        alert("Error creando producto");
+
+      } else {
+
+        alert("Producto creado correctamente");
+
+        setNombre("");
+        setPrecio("");
+        setDescripcion("");
+        setStock("");
+        setPreview("");
+        setImagen(null);
+        setCategoria("hombre");
+
+        obtenerProductos();
+
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Ocurrió un error");
+
+    } finally {
+
+      setLoading(false);
 
     }
 
@@ -123,9 +219,9 @@ export default function DashboardPage() {
 
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-10">
+      <div className="grid xl:grid-cols-2 gap-10">
 
-        {/* FORM */}
+        {/* FORMULARIO */}
         <div className="bg-[#111111] rounded-[35px] p-8 border border-white/5">
 
           <h2 className="text-3xl font-black mb-8">
@@ -134,10 +230,7 @@ export default function DashboardPage() {
 
           </h2>
 
-          <form
-            onSubmit={crearProducto}
-            className="flex flex-col gap-5"
-          >
+          <div className="flex flex-col gap-5">
 
             <input
               type="text"
@@ -145,7 +238,6 @@ export default function DashboardPage() {
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               className="bg-black border border-white/10 rounded-full px-6 py-4 outline-none"
-              required
             />
 
             <input
@@ -154,55 +246,39 @@ export default function DashboardPage() {
               value={precio}
               onChange={(e) => setPrecio(e.target.value)}
               className="bg-black border border-white/10 rounded-full px-6 py-4 outline-none"
-              required
             />
 
-            {/* IMAGEN */}
-            <div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e: any) => {
 
-              <label className="block mb-3 text-gray-400">
+                setImagen(e.target.files[0]);
 
-                Imagen producto
+                setPreview(
+                  URL.createObjectURL(
+                    e.target.files[0]
+                  )
+                );
 
-              </label>
+              }}
+              className="bg-black border border-white/10 rounded-full px-6 py-4"
+            />
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e: any) => {
-
-                  setImagen(e.target.files[0]);
-
-                  setPreview(
-                    URL.createObjectURL(
-                      e.target.files[0]
-                    )
-                  );
-
-                }}
-                className="w-full bg-black border border-white/10 rounded-full px-6 py-4"
-                required
-              />
-
-            </div>
-
-            {/* PREVIEW */}
             {preview && (
 
-              <div className="overflow-hidden rounded-[30px] border border-white/10">
-
-                <img
-                  src={preview}
-                  className="w-full h-[320px] object-cover"
-                />
-
-              </div>
+              <img
+                src={preview}
+                className="w-full h-[300px] object-cover rounded-[30px]"
+              />
 
             )}
 
             <select
               value={categoria}
-              onChange={(e) => setCategoria(e.target.value)}
+              onChange={(e) =>
+                setCategoria(e.target.value)
+              }
               className="bg-black border border-white/10 rounded-full px-6 py-4 outline-none"
             >
 
@@ -223,21 +299,24 @@ export default function DashboardPage() {
             <textarea
               placeholder="Descripción"
               value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-              className="bg-black border border-white/10 rounded-[25px] px-6 py-4 outline-none h-[140px]"
+              onChange={(e) =>
+                setDescripcion(e.target.value)
+              }
+              className="bg-black border border-white/10 rounded-[25px] px-6 py-4 h-[140px] outline-none"
             />
 
             <input
               type="number"
               placeholder="Stock"
               value={stock}
-              onChange={(e) => setStock(e.target.value)}
+              onChange={(e) =>
+                setStock(e.target.value)
+              }
               className="bg-black border border-white/10 rounded-full px-6 py-4 outline-none"
-              required
             />
 
             <button
-              type="submit"
+              onClick={crearProducto}
               disabled={loading}
               className="
                 bg-white
@@ -248,75 +327,260 @@ export default function DashboardPage() {
                 text-lg
                 hover:scale-[1.02]
                 transition
-                duration-300
-                mt-4
               "
             >
 
               {loading
-                ? "Subiendo producto..."
+                ? "Creando..."
                 : "Crear producto"}
 
             </button>
 
-          </form>
+          </div>
 
         </div>
 
-        {/* INFO */}
-        <div className="flex flex-col gap-6">
+        {/* PRODUCTOS */}
+        <div className="flex flex-col gap-5">
 
-          <div className="bg-[#111111] rounded-[35px] p-8 border border-white/5">
+          {productos.map((producto) => (
 
-            <p className="text-gray-400">
+            <div
+              key={producto.id}
+              className="bg-[#111111] rounded-[30px] overflow-hidden border border-white/5"
+            >
 
-              Estado sistema
+              <img
+                src={producto.imagen}
+                className="w-full h-[240px] object-cover"
+              />
 
-            </p>
+              <div className="p-5">
 
-            <h2 className="text-4xl font-black mt-4 text-green-500">
+                <div className="flex items-start justify-between gap-4">
 
-              ONLINE
+                  <div>
 
-            </h2>
+                    <h2 className="text-2xl font-black">
 
-          </div>
+                      {producto.nombre}
 
-          <div className="bg-[#111111] rounded-[35px] p-8 border border-white/5">
+                    </h2>
 
-            <p className="text-gray-400">
+                    <p className="text-gray-400 mt-2">
 
-              Base de datos
+                      {producto.descripcion}
 
-            </p>
+                    </p>
 
-            <h2 className="text-4xl font-black mt-4">
+                  </div>
 
-              Supabase
+                  <div className="flex gap-3">
 
-            </h2>
+                    <button
+                      onClick={() =>
+                        setEditando(producto)
+                      }
+                      className="
+                        bg-blue-500
+                        px-4
+                        py-2
+                        rounded-full
+                        hover:scale-105
+                        transition
+                      "
+                    >
 
-          </div>
+                      Editar
 
-          <div className="bg-[#111111] rounded-[35px] p-8 border border-white/5">
+                    </button>
 
-            <p className="text-gray-400">
+                    <button
+                      onClick={() =>
+                        eliminarProducto(producto.id)
+                      }
+                      className="
+                        bg-red-500
+                        px-4
+                        py-2
+                        rounded-full
+                        hover:scale-105
+                        transition
+                      "
+                    >
 
-              Storage imágenes
+                      Eliminar
 
-            </p>
+                    </button>
 
-            <h2 className="text-4xl font-black mt-4">
+                  </div>
 
-              ACTIVO
+                </div>
 
-            </h2>
+                <div className="flex justify-between mt-6">
 
-          </div>
+                  <p className="text-2xl font-black">
+
+                    $
+                    {Number(
+                      producto.precio
+                    ).toLocaleString("es-CL")}
+
+                  </p>
+
+                  <p className="text-gray-400">
+
+                    Stock: {producto.stock}
+
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          ))}
 
         </div>
 
       </div>
+
+      {/* MODAL EDITAR */}
+      {editando && (
+
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-5">
+
+          <div className="bg-[#111111] rounded-[35px] p-8 w-full max-w-[600px] border border-white/10">
+
+            <h2 className="text-4xl font-black mb-8">
+
+              Editar producto
+
+            </h2>
+
+            <div className="flex flex-col gap-5">
+
+              <input
+                type="text"
+                value={editando.nombre}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    nombre: e.target.value,
+                  })
+                }
+                className="bg-black border border-white/10 rounded-full px-6 py-4 outline-none"
+              />
+
+              <input
+                type="number"
+                value={editando.precio}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    precio: e.target.value,
+                  })
+                }
+                className="bg-black border border-white/10 rounded-full px-6 py-4 outline-none"
+              />
+
+              <textarea
+                value={editando.descripcion}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    descripcion: e.target.value,
+                  })
+                }
+                className="bg-black border border-white/10 rounded-[25px] px-6 py-4 h-[140px] outline-none"
+              />
+
+              <input
+                type="number"
+                value={editando.stock}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    stock: e.target.value,
+                  })
+                }
+                className="bg-black border border-white/10 rounded-full px-6 py-4 outline-none"
+              />
+
+              <select
+                value={editando.categoria}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    categoria: e.target.value,
+                  })
+                }
+                className="bg-black border border-white/10 rounded-full px-6 py-4 outline-none"
+              >
+
+                <option value="hombre">
+
+                  Hombre
+
+                </option>
+
+                <option value="mujer">
+
+                  Mujer
+
+                </option>
+
+              </select>
+
+              <div className="flex gap-4 mt-5">
+
+                <button
+                  onClick={actualizarProducto}
+                  className="
+                    flex-1
+                    bg-white
+                    text-black
+                    py-5
+                    rounded-full
+                    font-black
+                    hover:scale-[1.02]
+                    transition
+                  "
+                >
+
+                  Guardar cambios
+
+                </button>
+
+                <button
+                  onClick={() =>
+                    setEditando(null)
+                  }
+                  className="
+                    flex-1
+                    bg-[#222]
+                    py-5
+                    rounded-full
+                    font-black
+                    hover:scale-[1.02]
+                    transition
+                  "
+                >
+
+                  Cancelar
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
 
     </main>
 

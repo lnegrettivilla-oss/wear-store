@@ -1,32 +1,21 @@
 "use client";
 
 import Link from "next/link";
-
 import { useEffect, useState } from "react";
-
 import { supabase } from "../../lib/supabase";
 
 export default function HombrePage() {
 
   const [productos, setProductos] = useState<any[]>([]);
 
-  const [loading, setLoading] = useState(true);
-
   async function obtenerProductos() {
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("products")
       .select("*")
-      .eq("categoria", "hombre")
-      .order("id", { ascending: false });
+      .eq("categoria", "hombre");
 
-    if (!error && data) {
-
-      setProductos(data);
-
-    }
-
-    setLoading(false);
+    setProductos(data || []);
 
   }
 
@@ -38,93 +27,59 @@ export default function HombrePage() {
 
   return (
 
-    <main className="bg-black min-h-screen text-white p-5">
+    <main className="bg-black min-h-screen text-white p-5 md:p-10">
 
-      {/* HEADER */}
-      <div className="mb-10">
+      <h1 className="text-7xl font-black mb-10">
+        HOMBRE
+      </h1>
 
-        <Link href="/">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          <button className="mb-6 bg-[#111111] px-5 py-3 rounded-full hover:bg-white hover:text-black transition">
+        {productos.map((producto) => (
 
-            ← Volver
+          <Link
+            href={`/producto/${producto.id}`}
+            key={producto.id}
+            className="block"
+          >
 
-          </button>
+            <div className="bg-[#111111] rounded-[30px] overflow-hidden hover:scale-[1.03] transition cursor-pointer">
 
-        </Link>
+              <img
+                src={producto.imagen}
+                className="w-full h-[400px] object-cover"
+              />
 
-        <h1 className="text-6xl font-black">
+              <div className="p-5">
 
-          HOMBRE
+                <h2 className="text-3xl font-black">
 
-        </h1>
+                  {producto.nombre}
 
-        <p className="text-gray-400 mt-3">
+                </h2>
 
-          Colección masculina premium
+                <p className="text-gray-400 mt-3">
 
-        </p>
+                  {producto.descripcion}
 
-      </div>
+                </p>
 
-      {/* LOADING */}
-      {loading ? (
+                <p className="text-2xl font-black mt-5">
 
-        <div className="text-center py-20 text-gray-500">
+                  $
+                  {Number(producto.precio).toLocaleString("es-CL")}
 
-          Cargando productos...
-
-        </div>
-
-      ) : (
-
-        <div className="grid grid-cols-2 gap-4">
-
-          {productos.map((producto) => (
-
-            <Link
-              key={producto.id}
-              href={`/producto/${producto.id}`}
-            >
-
-              <div className="bg-[#111111] rounded-[25px] overflow-hidden hover:scale-[1.02] transition duration-300">
-
-                <img
-                  src={producto.imagen}
-                  className="w-full h-[260px] object-cover"
-                />
-
-                <div className="p-4">
-
-                  <h2 className="text-lg font-bold">
-
-                    {producto.nombre}
-
-                  </h2>
-
-                  <p className="text-gray-400 mt-2">
-
-                    ${Number(producto.precio).toLocaleString("es-CL")}
-
-                  </p>
-
-                  <p className="text-sm text-gray-500 mt-2 uppercase">
-
-                    {producto.categoria}
-
-                  </p>
-
-                </div>
+                </p>
 
               </div>
 
-            </Link>
+            </div>
 
-          ))}
+          </Link>
 
-        </div>
+        ))}
 
-      )}
+      </div>
 
     </main>
 

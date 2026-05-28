@@ -1,156 +1,122 @@
 "use client";
 
 import Link from "next/link";
-
 import { useCart } from "../../context/CartContext";
 
 export default function CheckoutPage() {
 
   const { cart } = useCart();
 
-  const total = cart.reduce((acc: number, item: any) => {
+  const total = cart.reduce(
+    (acc: number, item: any) => {
+      return acc + Number(item.precio) * item.cantidad;
+    },
+    0
+  );
 
-    const precio = Number(
-      item.precio.replace("$", "").replace(".", "")
-    );
+  async function pagar() {
 
-    return acc + precio;
+    try {
 
-  }, 0);
+      const response = await fetch("/api/create-preference", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: cart,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.id) {
+
+        window.location.href =
+          `https://www.mercadopago.cl/checkout/v1/redirect?pref_id=${data.id}`;
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
 
   return (
 
-    <main className="bg-black min-h-screen text-white p-5">
+    <main className="bg-black min-h-screen text-white p-5 md:p-10">
 
-      {/* VOLVER */}
-      <Link href="/carrito">
+      <div className="mb-12">
 
-        <button className="mb-8 bg-[#111111] px-5 py-3 rounded-full hover:scale-105 transition">
+        <Link href="/carrito">
 
-          ← Volver al carrito
+          <button className="mb-6 bg-[#111111] px-5 py-3 rounded-full hover:bg-white hover:text-black transition">
 
-        </button>
+            ← Volver al carrito
 
-      </Link>
+          </button>
 
-      {/* TITULO */}
-      <h1 className="text-6xl font-black mb-12">
+        </Link>
 
-        CHECKOUT
+        <h1 className="text-6xl font-black">
+          CHECKOUT
+        </h1>
 
-      </h1>
+        <p className="text-gray-400 mt-4">
+          Finaliza tu compra premium
+        </p>
+
+      </div>
 
       <div className="grid lg:grid-cols-2 gap-10">
 
-        {/* FORMULARIO */}
-        <div className="bg-[#111111] rounded-[35px] p-8">
+        <div className="bg-[#111111] rounded-[35px] p-8 border border-white/5">
 
-          <h2 className="text-3xl font-bold mb-8">
-
-            Información envío
-
+          <h2 className="text-3xl font-black mb-8">
+            Tu pedido
           </h2>
 
-          <div className="space-y-5">
+          <div className="flex flex-col gap-5">
 
-            <input
-              type="text"
-              placeholder="Nombre completo"
-              className="w-full bg-black border border-neutral-800 rounded-full px-6 py-4 outline-none"
-            />
-
-            <input
-              type="text"
-              placeholder="Dirección"
-              className="w-full bg-black border border-neutral-800 rounded-full px-6 py-4 outline-none"
-            />
-
-            <input
-              type="text"
-              placeholder="Ciudad"
-              className="w-full bg-black border border-neutral-800 rounded-full px-6 py-4 outline-none"
-            />
-
-            <input
-              type="text"
-              placeholder="Teléfono"
-              className="w-full bg-black border border-neutral-800 rounded-full px-6 py-4 outline-none"
-            />
-
-          </div>
-
-          {/* METODOS */}
-          <div className="mt-10">
-
-            <h2 className="text-3xl font-bold mb-6">
-
-              Método de pago
-
-            </h2>
-
-            <div className="space-y-4">
-
-              <button className="w-full bg-black border border-neutral-800 rounded-full px-6 py-5 text-left hover:border-white transition">
-
-                💳 Tarjeta crédito/débito
-
-              </button>
-
-              <button className="w-full bg-black border border-neutral-800 rounded-full px-6 py-5 text-left hover:border-white transition">
-
-                🟢 MercadoPago
-
-              </button>
-
-              <button className="w-full bg-black border border-neutral-800 rounded-full px-6 py-5 text-left hover:border-white transition">
-
-                🏦 Transferencia bancaria
-
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* RESUMEN */}
-        <div className="bg-[#111111] rounded-[35px] p-8 h-fit sticky top-24">
-
-          <h2 className="text-3xl font-bold mb-8">
-
-            Resumen
-
-          </h2>
-
-          <div className="space-y-5">
-
-            {cart.map((producto: any, index: number) => (
+            {cart.map((item: any) => (
 
               <div
-                key={index}
-                className="flex items-center gap-4"
+                key={`${item.id}-${item.talla}`}
+                className="flex items-center gap-5 border-b border-white/10 pb-5"
               >
 
                 <img
-                  src={producto.imagen}
-                  className="w-20 h-20 object-cover rounded-[20px]"
+                  src={item.imagen}
+                  className="w-[100px] h-[100px] rounded-[20px] object-cover"
                 />
 
                 <div className="flex-1">
 
-                  <h3 className="font-bold">
-                    {producto.nombre}
+                  <h3 className="text-xl font-bold">
+                    {item.nombre}
                   </h3>
 
-                  <p className="text-gray-400 text-sm">
-                    Talla: {producto.talla}
+                  <p className="text-gray-400 mt-2">
+                    Talla: {item.talla}
+                  </p>
+
+                  <p className="text-gray-400">
+                    Cantidad: {item.cantidad}
                   </p>
 
                 </div>
 
-                <p>
-                  {producto.precio}
+                <p className="text-xl font-black">
+
+                  $
+                  {(
+                    Number(item.precio) *
+                    item.cantidad
+                  ).toLocaleString("es-CL")}
+
                 </p>
 
               </div>
@@ -159,29 +125,78 @@ export default function CheckoutPage() {
 
           </div>
 
-          {/* TOTAL */}
-          <div className="border-t border-white/10 mt-10 pt-8">
+        </div>
 
-            <div className="flex justify-between text-2xl font-bold">
+        <div className="bg-[#111111] rounded-[35px] p-8 border border-white/5 h-fit">
 
-              <p>Total</p>
+          <h2 className="text-3xl font-black mb-8">
+            Resumen
+          </h2>
 
-              <p>
+          <div className="flex justify-between mb-5">
 
-                ${total.toLocaleString("es-CL")}
+            <p className="text-gray-400">
+              Productos
+            </p>
 
-              </p>
-
-            </div>
+            <p>
+              {cart.length}
+            </p>
 
           </div>
 
-          {/* BOTON */}
-          <button className="w-full mt-10 bg-white text-black py-5 rounded-full text-lg font-bold hover:scale-[1.02] transition">
+          <div className="flex justify-between mb-5">
 
-            Finalizar compra
+            <p className="text-gray-400">
+              Envío
+            </p>
+
+            <p>
+              Gratis
+            </p>
+
+          </div>
+
+          <div className="border-t border-white/10 pt-6 mt-6 flex justify-between items-center">
+
+            <p className="text-2xl font-black">
+              Total
+            </p>
+
+            <p className="text-3xl font-black">
+
+              $
+              {total.toLocaleString("es-CL")}
+
+            </p>
+
+          </div>
+
+          <button
+            onClick={pagar}
+            className="
+              w-full
+              mt-10
+              bg-white
+              text-black
+              py-5
+              rounded-full
+              font-black
+              text-lg
+              hover:scale-[1.02]
+              transition
+            "
+          >
+
+            Pagar ahora
 
           </button>
+
+          <p className="text-center text-gray-500 mt-5 text-sm">
+
+            Pago 100% seguro y protegido.
+
+          </p>
 
         </div>
 

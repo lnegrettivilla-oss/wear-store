@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { useCart } from "../../context/CartContext";
 
 export default function CarritoPage() {
@@ -9,6 +10,8 @@ export default function CarritoPage() {
     cart,
     increaseQuantity,
     decreaseQuantity,
+    removeFromCart,
+    clearCart,
   } = useCart();
 
   const total = cart.reduce((acc: number, item: any) => {
@@ -43,19 +46,44 @@ export default function CarritoPage() {
       </Link>
 
       {/* TITULO */}
-      <div className="flex items-center justify-between mb-12">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-12">
 
-        <h1 className="text-5xl md:text-6xl font-black tracking-tight">
+        <div>
 
-          CARRITO
+          <h1 className="text-5xl md:text-6xl font-black tracking-tight">
 
-        </h1>
+            CARRITO
 
-        <div className="text-gray-400 text-sm md:text-base">
+          </h1>
 
-          {cart.length} productos
+          <p className="text-gray-400 mt-3">
+
+            {cart.length} productos agregados
+
+          </p>
 
         </div>
+
+        {cart.length > 0 && (
+
+          <button
+            onClick={clearCart}
+            className="
+              bg-red-500
+              px-6
+              py-3
+              rounded-full
+              hover:scale-105
+              transition
+              font-bold
+            "
+          >
+
+            Vaciar carrito
+
+          </button>
+
+        )}
 
       </div>
 
@@ -153,7 +181,7 @@ export default function CarritoPage() {
                   </div>
 
                   {/* CONTROLES */}
-                  <div className="flex items-center justify-between mt-8">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mt-8">
 
                     {/* CANTIDAD */}
                     <div className="flex items-center gap-4 bg-black rounded-full px-4 py-2 border border-white/10">
@@ -199,23 +227,50 @@ export default function CarritoPage() {
                     </div>
 
                     {/* SUBTOTAL */}
-                    <div>
+                    <div className="flex items-center gap-5">
 
-                      <p className="text-gray-400 text-sm">
+                      <div>
 
-                        Subtotal
+                        <p className="text-gray-400 text-sm">
 
-                      </p>
+                          Subtotal
 
-                      <p className="text-xl font-bold">
+                        </p>
 
-                        $
-                        {(
-                          Number(producto.precio) *
-                          producto.cantidad
-                        ).toLocaleString("es-CL")}
+                        <p className="text-xl font-bold">
 
-                      </p>
+                          $
+                          {(
+                            Number(producto.precio) *
+                            producto.cantidad
+                          ).toLocaleString("es-CL")}
+
+                        </p>
+
+                      </div>
+
+                      {/* ELIMINAR */}
+                      <button
+                        onClick={() =>
+                          removeFromCart(
+                            producto.id,
+                            producto.talla
+                          )
+                        }
+                        className="
+                          bg-red-500
+                          px-5
+                          py-3
+                          rounded-full
+                          hover:scale-105
+                          transition
+                          font-bold
+                        "
+                      >
+
+                        Eliminar
+
+                      </button>
 
                     </div>
 

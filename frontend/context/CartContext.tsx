@@ -1,6 +1,11 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 const CartContext = createContext<any>(null);
 
@@ -13,6 +18,53 @@ export function CartProvider({
   const [cart, setCart] = useState<any[]>([]);
 
   const [favorites, setFavorites] = useState<any[]>([]);
+
+  /* CARGAR LOCALSTORAGE */
+  useEffect(() => {
+
+    const savedCart =
+      localStorage.getItem("wear-cart");
+
+    const savedFavorites =
+      localStorage.getItem(
+        "wear-favorites"
+      );
+
+    if (savedCart) {
+
+      setCart(JSON.parse(savedCart));
+
+    }
+
+    if (savedFavorites) {
+
+      setFavorites(
+        JSON.parse(savedFavorites)
+      );
+
+    }
+
+  }, []);
+
+  /* GUARDAR CARRITO */
+  useEffect(() => {
+
+    localStorage.setItem(
+      "wear-cart",
+      JSON.stringify(cart)
+    );
+
+  }, [cart]);
+
+  /* GUARDAR FAVORITOS */
+  useEffect(() => {
+
+    localStorage.setItem(
+      "wear-favorites",
+      JSON.stringify(favorites)
+    );
+
+  }, [favorites]);
 
   /* AGREGAR CARRITO */
   const addToCart = (producto: any) => {
@@ -111,6 +163,33 @@ export function CartProvider({
 
   };
 
+  /* ELIMINAR */
+  const removeFromCart = (
+    id: number,
+    talla: string
+  ) => {
+
+    setCart(
+
+      cart.filter(
+        (item) =>
+          !(
+            item.id === id &&
+            item.talla === talla
+          )
+      )
+
+    );
+
+  };
+
+  /* LIMPIAR */
+  const clearCart = () => {
+
+    setCart([]);
+
+  };
+
   /* FAVORITOS */
   const toggleFavorite = (producto: any) => {
 
@@ -128,7 +207,10 @@ export function CartProvider({
 
     } else {
 
-      setFavorites([...favorites, producto]);
+      setFavorites([
+        ...favorites,
+        producto,
+      ]);
 
     }
 
@@ -142,6 +224,8 @@ export function CartProvider({
         addToCart,
         increaseQuantity,
         decreaseQuantity,
+        removeFromCart,
+        clearCart,
         favorites,
         toggleFavorite,
       }}
