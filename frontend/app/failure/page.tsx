@@ -1,66 +1,9 @@
-import { MercadoPagoConfig, Preference } from "mercadopago";
-
-const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN!,
-});
-
-export async function POST(req: Request) {
-
-  try {
-
-    const body = await req.json();
-
-    const preference = new Preference(client);
-
-    const response = await preference.create({
-
-      body: {
-
-        items: body.items.map((item: any) => ({
-
-          title: item.nombre,
-
-          quantity: item.cantidad,
-
-          currency_id: "CLP",
-
-          unit_price: Number(item.precio),
-
-        })),
-
-        back_urls: {
-
-          success: "http://localhost:3000/success",
-
-          failure: "http://localhost:3000/failure",
-
-          pending: "http://localhost:3000/failure",
-
-        },
-
-        auto_return: "approved",
-
-      },
-
-    });
-
-    return Response.json({
-      id: response.id,
-    });
-
-  } catch (error) {
-
-    console.log(error);
-
-    return Response.json(
-      {
-        error: "Error creando preferencia",
-      },
-      {
-        status: 500,
-      }
-    );
-
-  }
-
+export default function FailurePage() {
+  return (
+    <main className="min-h-screen bg-black text-white flex items-center justify-center">
+      <h1 className="text-4xl font-bold">
+        Pago rechazado
+      </h1>
+    </main>
+  );
 }
