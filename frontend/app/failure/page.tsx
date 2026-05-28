@@ -1,50 +1,66 @@
-"use client";
+import { MercadoPagoConfig, Preference } from "mercadopago";
 
-import Link from "next/link";
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN!,
+});
 
-export default function FailurePage() {
+export async function POST(req: Request) {
 
-  return (
+  try {
 
-    <main className="bg-black min-h-screen text-white flex flex-col items-center justify-center p-10 text-center">
+    const body = await req.json();
 
-      <h1 className="text-7xl font-black text-red-500">
+    const preference = new Preference(client);
 
-        PAGO CANCELADO
+    const response = await preference.create({
 
-      </h1>
+      body: {
 
-      <p className="text-gray-400 mt-6 text-xl">
+        items: body.items.map((item: any) => ({
 
-        El pago no pudo completarse.
+          title: item.nombre,
 
-      </p>
+          quantity: item.cantidad,
 
-      <Link href="/checkout">
+          currency_id: "CLP",
 
-        <button
-          className="
-            mt-10
-            bg-white
-            text-black
-            px-10
-            py-5
-            rounded-full
-            font-black
-            text-xl
-            hover:scale-105
-            transition
-          "
-        >
+          unit_price: Number(item.precio),
 
-          Intentar nuevamente
+        })),
 
-        </button>
+        back_urls: {
 
-      </Link>
+          success: "http://localhost:3000/success",
 
-    </main>
+          failure: "http://localhost:3000/failure",
 
-  );
+          pending: "http://localhost:3000/failure",
+
+        },
+
+        auto_return: "approved",
+
+      },
+
+    });
+
+    return Response.json({
+      id: response.id,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return Response.json(
+      {
+        error: "Error creando preferencia",
+      },
+      {
+        status: 500,
+      }
+    );
+
+  }
 
 }
