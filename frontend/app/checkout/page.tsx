@@ -129,6 +129,72 @@ export default function CheckoutPage() {
 
         <div className="bg-[#111111] rounded-[35px] p-8 border border-white/5 h-fit">
 
+          <div className="mb-10">
+
+            <h2 className="text-3xl font-black mb-8">
+              Información envío
+            </h2>
+
+            <div className="flex flex-col gap-4">
+
+              <input
+                type="text"
+                placeholder="Nombre completo"
+                className="bg-black border border-white/10 rounded-full px-5 py-4 outline-none"
+              />
+
+              <input
+                type="text"
+                placeholder="Dirección"
+                className="bg-black border border-white/10 rounded-full px-5 py-4 outline-none"
+              />
+
+              <input
+                type="text"
+                placeholder="Departamento / Casa"
+                className="bg-black border border-white/10 rounded-full px-5 py-4 outline-none"
+              />
+
+              <input
+                type="text"
+                placeholder="Ciudad"
+                className="bg-black border border-white/10 rounded-full px-5 py-4 outline-none"
+              />
+
+              <input
+                type="text"
+                placeholder="Teléfono"
+                className="bg-black border border-white/10 rounded-full px-5 py-4 outline-none"
+              />
+
+            </div>
+
+          </div>
+
+          <div className="mb-10">
+
+            <h2 className="text-3xl font-black mb-8">
+              Método de pago
+            </h2>
+
+            <div className="flex flex-col gap-4">
+
+              <button className="border border-white/10 rounded-full px-5 py-4 text-left hover:bg-white hover:text-black transition">
+                Tarjeta crédito/débito
+              </button>
+
+              <button className="border border-white/10 rounded-full px-5 py-4 text-left hover:bg-white hover:text-black transition">
+                MercadoPago
+              </button>
+
+              <button className="border border-white/10 rounded-full px-5 py-4 text-left hover:bg-white hover:text-black transition">
+                Transferencia bancaria
+              </button>
+
+            </div>
+
+          </div>
+
           <h2 className="text-3xl font-black mb-8">
             Resumen
           </h2>
